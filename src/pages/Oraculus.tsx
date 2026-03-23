@@ -1258,8 +1258,10 @@ const Oraculus = () => {
         setTimeout(() => reject(new Error(t.errors.timeout)), 150000);
       });
 
-      const analysisPromise = supabase.functions.invoke("analyze-article", {
-        body: { 
+      const analysisPromise = fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           articleText: hasText ? articleText : undefined,
           articleUrl: hasUrl && analysisMode === "external" ? articleUrl.trim() : undefined,
           isOwnText: analysisMode === "own",
@@ -1267,8 +1269,8 @@ const Oraculus = () => {
           language: language,
           includeWritingReview: analysisMode === "own",
           includeScholarRecommendations: analysisMode === "own",
-        },
-      });
+        }),
+      }).then(res => res.json()).then(data => ({ data, error: data.error }));
 
       let response;
       try {
